@@ -1,0 +1,99 @@
+# 写日志
+
+> 贡献者：[@ImPerat0R\_](https://github.com/tssujt)、[@ThinkingChen](https://github.com/cdmikechen)
+
+## 在本地写日志
+
+用户可以使用在`airflow.cfg`中的`base_log_folder`指定日志文件夹。默认情况下，它位于`AIRFLOW_HOME`目录中。
+
+此外，用户也可以提供远程位置，以便在云存储中存储日志和日志备份。
+
+在 Airflow Web UI 中，本地日志优先于远程日志。 如果找不到或访问本地日志，将显示远程日志。 请注意，只有在任务完成（包括失败）后才会将日志发送到远程存储。 换句话说，运行任务的远程日志不可用。日志以`{dag_id}/{task_id}/{execution_date}/{try_number}.log`的路径格式存储在日志文件夹中。
+
+## 将日志写入 Amazon S3
+
+### 在您开始之前
+
+远程日志记录使用现有的 Airflow 连接来读取/写入日志。如果没有正确设置连接，则会失败。
+
+### 启用远程日志记录
+
+要启用此功能，必须按照此示例配置`airflow.cfg` ：
+
+```py
+[core]
+# Airflow 可以在 AWS S3 中远程存储日志。用户必须提供一个远程地址的 URL（以's3://...'开始）
+# 和一个提供对存储位置访问的 Airflow 连接 id
+remote_base_log_folder = s3://my-bucket/path/to/logs
+remote_log_conn_id = MyS3Conn
+# 对存储在 S3 中的日志使用服务器端加密
+encrypt_s3_logs = False
+```
+
+在上面的例子中，Airflow 将尝试使用`S3Hook('MyS3Conn')` 。
+
+## 将日志写入 Azure Blob Storage
+
+在 Azure Blob Storage 中 Airflow 可以为配置读取和写入任务日志。 可以按照以下步骤启用 Azure Blob Storage 日志记录。
+
+1. Airflow 的日志记录系统需要将一个自定义的 .py 文件 放在`PYTHONPATH`，以便可以从 Airflow 导入。首先创建一个存储配置文件的目录。建议使用`$AIRFLOW_HOME/config`。
+
+2. 创建名为`$AIRFLOW_HOME/config/log_config.py`和`$AIRFLOW_HOME/config/__init__.py`的空文件。
+
+3. 将`airflow/config_templates/airflow_local_settings.py`的内容复制到刚刚在上面的步骤中创建的`log_config.py`文件中。
+
+4. 自定义模板的以下部分：
+
+```py
+# wasb buckets 应该从“wasb”开始，以帮助 Airflow 选择正确的处理程序
+REMOTE_BASE_LOG_FOLDER = 'wasb-<whatever you want here>'
+
+# 重命名 DEFAULT_LOGGING_CONFIG 为 LOGGING CONFIG
+LOGGING_CONFIG = ...
+```
+
+5. 确保已在 Airflow 中定义 Azure Blob Storage（Wasb）的连接 hook。hook 应具有在`REMOTE_BASE_LOG_FOLDER`中定义的 Azure Blob Storage bucket 的读写访问权限。
+
+6. 更新`$AIRFLOW_HOME/airflow.cfg`以包含：
+
+```py
+remote_logging = True
+logging_config_class = log_config.LOGGING_CONFIG
+remote_log_conn_id = <name of the Azure Blob Storage connection>
+```
+
+7. 重新启动 Airflow webserver 和 scheduler，并触发（或等待）新任务执行。
+
+8. 验证日志是否显示在您定义的 bucket 中新执行的任务中。
+
+## 将日志写入 Google Cloud Storage
+
+请按照以下步骤启用 Google Cloud Storage 日志记录。
+
+要启用此功能，必须按照此示例配置 airflow.cfg：
+
+```py
+[core]
+# Airflow 可以在 AWS S3, Google Cloud Storage 或者 Elastic Search 中远程存储日志.
+# 用户必须提供可访问存储位置的 Airflow 连接 id。
+# 如果 remote_logging 被设置为 true，请参见 UPDATING.md 以查看其他相关配置的要求。
+remote_logging = True
+remote_base_log_folder = gs://my-bucket/path/to/logs
+remote_log_conn_id = MyGCSConn
+```
+
+1. 首先安装`gcp_api`安装包，`pip install apache-airflow[gcp_api]`。
+2. 确保已在 Airflow 中定义了 Google Cloud Platform 连接 hook。该 hook 应具有对 remote_base_log_folder 中上面定义的 Google Cloud Storage bucket 的读写访问权限。
+3. 重新启动 Airflow webserver 和 scheduler，并触发（或等待）新任务执行。
+4. 验证日志是否在您定义的 bucket 中显示新执行的任务日志。
+5. 确认 Google Cloud Storage 查看器在 U​​I 中正常运行。拉出新执行的任务，并验证您是否看到类似的内容
+
+```py
+*** Reading remote log from gs://<bucket where logs should be persisted>/example_bash_operator/run_this_last/2017-10-03T00:00:00/16.log.
+[2017-10-03 21:57:50,056] {cli.py:377} INFO - Running on host chrisr-00532
+[2017-10-03 21:57:50,093] {base_task_runner.py:115} INFO - Running: ['bash', '-c', u'airflow run example_bash_operator run_this_last 2017-10-03T00:00:00 --job_id 47 --raw -sd DAGS_FOLDER/example_dags/example_bash_operator.py']
+[2017-10-03 21:57:51,264] {base_task_runner.py:98} INFO - Subtask: [2017-10-03 21:57:51,263] {__init__.py:45} INFO - Using executor SequentialExecutor
+[2017-10-03 21:57:51,306] {base_task_runner.py:98} INFO - Subtask: [2017-10-03 21:57:51,306] {models.py:186} INFO - Filling up the DagBag from /airflow/dags/example_dags/example_bash_operator.py
+```
+
+请注意顶行说明了它是从远程日志文件中读取的。
