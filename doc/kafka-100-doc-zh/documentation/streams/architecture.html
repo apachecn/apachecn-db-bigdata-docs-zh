@@ -53,7 +53,7 @@ var context={
     <p>
         下图展示了使用Kafka Streams库的应用程序的解剖结构。让我们来看看一些细节。
     </p>
-    <img class="centered" src="{{version}}/images/streams-architecture-overview.jpg" style="width:750px">
+    <img class="centered" src="images/streams-architecture-overview.jpg" style="width:750px">
 
     <h3><a id="streams_architecture_tasks" href="#streams_architecture_tasks">Stream Partitions and Tasks</a></h3>
 
@@ -87,7 +87,7 @@ var context={
     <p>
         下图显示了两个任务，每个任务分配 input stream 的 一个 partition。
     </p>
-    <img class="centered" src="{{version}}/images/streams-architecture-tasks.jpg" style="width:400px">
+    <img class="centered" src="images/streams-architecture-tasks.jpg" style="width:400px">
     <br>
 
     <h3><a id="streams_architecture_threads" href="#streams_architecture_threads">Threading Model</a></h3>
@@ -96,7 +96,7 @@ var context={
         Kafka Streams 允许用户配置应用程序实例中可并行的<b>线程数量</b>。
         每个线程都可以按照处理器拓扑结构独立执行一个或多个任务。 例如，下图显示了一个运行两个流任务的流线程。
     </p>
-    <img class="centered" src="{{version}}/images/streams-architecture-threads.jpg" style="width:400px">
+    <img class="centered" src="images/streams-architecture-threads.jpg" style="width:400px">
 
     <p>
         启动更多流线程或更多的应用程序实例仅仅意味着可以复制更多的拓扑结构来处理不同的Kafka分区子集，从而有效地并行处理。
@@ -125,7 +125,7 @@ var context={
     <p>
         下图中的两个流任务都具有专用的 local state stores 。
     </p>
-    <img class="centered" src="{{version}}/images/streams-architecture-states.jpg" style="width:400px">
+    <img class="centered" src="images/streams-architecture-states.jpg" style="width:400px">
     <br>
 
     <h3><a id="streams_architecture_recovery" href="#streams_architecture_recovery">Fault Tolerance</a></h3>

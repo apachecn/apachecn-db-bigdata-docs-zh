@@ -482,7 +482,7 @@ var context={
             <li>The <a href="documentation/streams">Streams API</a> 允许一个应用程序作为一个<i>流处理器</i>，消费一个或者多个topic产生的输入流，然后生产一个输出流到一个或多个topic中去，在输入输出流中进行有效的转换。
             <li>The <a href="documentation.html#connect">Connector API</a> 允许构建并运行可重用的生产者或者消费者，将Kafka topics连接到已存在的应用程序或者数据系统。比如，连接到一个关系型数据库，捕捉表（table）的所有变更内容。
         </ul>
-        <img src="{{version}}/images/kafka-apis.png" style="float: right; width: 50%;">
+        <img src="images/kafka-apis.png" style="float: right; width: 50%;">
     </div>
     <p>
         在Kafka中，客户端和服务器使用一个简单、高性能、支持多语言的 <a href="https://kafka.apache.org/protocol.html">TCP 协议</a>.此协议版本化并且向下兼容老版本， 我们为Kafka提供了Java客户端，也支持许多<a href="https://cwiki.apache.org/confluence/display/KAFKA/Clients">其他语言的客户端</a>。</p>
@@ -491,14 +491,14 @@ var context={
     <p>让我们首先深入了解下Kafka的核心概念:提供一串流式的记录&mdash; topic 。</p>
     <p>Topic 就是数据主题，是数据记录发布的地方,可以用来区分业务系统。Kafka中的Topics总是多订阅者模式，一个topic可以拥有一个或者多个消费者来订阅它的数据。</p>
     <p>对于每一个topic， Kafka集群都会维持一个分区日志，如下所示： </p>
-    <img class="centered" src="{{version}}/images/log_anatomy.png">
+    <img class="centered" src="images/log_anatomy.png">
 
     <p>每个分区都是有序且顺序不可变的记录集，并且不断地追加到结构化的commit log文件。分区中的每一个记录都会分配一个id号来表示顺序，我们称之为offset，<i>offset</i>用来唯一的标识分区中每一条记录。
     </p>
     <p>
         Kafka 集群保留所有发布的记录&mdash;无论他们是否已被消费&mdash;并通过一个可配置的参数——保留期限来控制. 举个例子， 如果保留策略设置为2天，一条记录发布后两天内，可以随时被消费，两天过后这条记录会被抛弃并释放磁盘空间。Kafka的性能和数据大小无关，所以长时间存储数据没有什么问题.
     </p>
-    <img class="centered" src="{{version}}/images/log_consumer.png" style="width:400px">
+    <img class="centered" src="images/log_consumer.png" style="width:400px">
     <p>
         事实上，在每一个消费者中唯一保存的元数据是offset（偏移量）即消费在log中的位置.偏移量由消费者所控制:通常在读取记录后，消费者会以线性的方式增加偏移量，但是实际上，由于这个位置由消费者控制，所以消费者可以采用任何顺序来消费记录。例如，一个消费者可以重置到一个旧的偏移量，从而重新处理过去的数据；也可以跳过最近的记录，从"现在"开始消费。
     </p>
@@ -533,7 +533,7 @@ var context={
     <p>
         如果所有的消费者实例在不同的消费组中，每条消息记录会广播到所有的消费者进程.
     </p>
-    <img class="centered" src="{{version}}/images/consumer-groups.png">
+    <img class="centered" src="images/consumer-groups.png">
     <p>
         如图，这个 Kafka 集群有两台 server 的，四个分区(p0-p3)和两个消费者组。消费组A有两个消费者，消费组B有四个消费者。
     </p>
@@ -3190,7 +3190,7 @@ ISR 副本同步完成，就会返回消息已经写入。例如，一个 topic 
 <h4><a id="design_compactionbasics" href="#design_compactionbasics">日志压缩基础</a></h4>
 这是一个高级别的日志逻辑图，展示了kafka日志的每条消息的offset逻辑结构。
 <p>
-    <img class="centered" src="{{version}}/images/log_cleaner_anatomy.png">
+    <img class="centered" src="images/log_cleaner_anatomy.png">
 <p>
     Log head中包含传统的Kafka日志，它包含了连续的offset和所有的消息。
     日志压缩增加了处理tail Log的选项。
@@ -3206,7 +3206,7 @@ ISR 副本同步完成，就会返回消息已经写入。例如，一个 topic 
     压缩操作通过在后台周期性的拷贝日志段来完成。
     清除操作不会阻塞读取，并且可以被配置不超过一定IO吞吐来避免影响Producer和Consumer。实际的日志段压缩过程有点像这样：
 <p>
-    <img class="centered" src="{{version}}/images/log_compaction.png">
+    <img class="centered" src="images/log_compaction.png">
 <p>
 <h4><a id="design_compactionguarantees" href="#design_compactionguarantees">What guarantees does log compaction provide?</a></h4>
 日志压缩的保障措施如下：
@@ -3447,7 +3447,7 @@ Log Cleaner默认启用。这会启动清理的线程池。如果要开始特定
    <p>
     消息的偏移量用作消息 id 是不常见的.我们最开始的想法是使用 producer 自增的 GUID ,并维护从 GUID 到每个 broker 的 offset 的映射.这样的话每个消费者需要为每个服务端维护一个 ID,提供全球唯一的 GUID 没有意义.而且,维护一个从随机 ID 到偏移量映射的复杂度需要一个重度的索引结构,它需要与磁盘进行同步,本质上需要一个完整的持久随机访问数据结构.因此为了简化查找结构,我们决定针对每个分区使用一个原子计数器,它可以利用分区id和节点id唯一标识一条消息.虽然这使得查找结构足够简单,但每个消费者的多个查询请求依然是相似的.一旦我们决定使用使用计数器,直接跳转到对应的偏移量显得更加自然-毕竟对于每个分区来说它们都是一个单调递增的整数.由于消费者API隐藏了偏移量，所以这个决定最终是一个实现细节，我们采用了更高效的方法。
     </p>
-    <img class="centered" src="{{version}}/images/kafka_log.png">
+    <img class="centered" src="images/kafka_log.png">
     <h4><a id="impl_writes" href="#impl_writes">Writes</a></h4>
     <p>
     日志允许序列化的追加到最后一个文件中.当文件大小达到配置的大小(默认 1G)时,会生成一个新的文件.日志中有两个配置参数: <i>M</i> 是在 OS 强制写文件到磁盘之前的消息条数, <i>S</i> 是强制写盘的秒数.这提供了一个在系统崩溃时最多丢失 <i>M</i> 条或者 <i>S</i> 秒消息的保证.
