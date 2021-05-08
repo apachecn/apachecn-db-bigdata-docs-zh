@@ -21,6 +21,7 @@
 +   [Storm 1.1.0 中文文档](doc/storm-110-doc-zh/SUMMARY.md)
 +   [Zeppelin 0.7.2 中文文档](doc/zeppelin-072-doc-zh/SUMMARY.md)
 +   [Hudi 0.5.0 中文文档](doc/hudi-050-doc-zh/SUMMARY.md)
++   [Kafka 1.0.0 中文文档](doc/kafka-100-doc-zh/SUMMARY.md)
 
 ## 贡献指南
 
